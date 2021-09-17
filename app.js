@@ -4,6 +4,8 @@ const createError = require('http-errors');
 const logger = require('morgan');
 const sassMiddleware = require('node-sass-middleware');
 const serveFavicon = require('serve-favicon');
+const MongoStore = require('connect-mongo');
+const expressSession = require('express-session');
 
 const authenticationRouter = require('./routes/authentication');
 
@@ -28,6 +30,21 @@ app.use(
       process.env.NODE_ENV === 'development' ? 'nested' : 'compressed',
     force: process.env.NODE_ENV === 'development',
     sourceMap: true
+  })
+);
+
+app.use(
+  expressSession({
+    secret: process.env.SESSION_SECRET,
+    saveUninitialized: false,
+    resave: true,
+    cookie: {
+      maxAge: 15 * 24 * 60 * 60 * 1000 // 15 days
+    },
+    store: MongoStore.create({
+      mongoUrl: process.env.MONGODB_URI,
+      ttl: 60 * 60
+    })
   })
 );
 

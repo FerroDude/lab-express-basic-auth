@@ -15,6 +15,7 @@ authenticationRouter.post('/register', (req, res, next) => {
       });
     })
     .then((user) => {
+      req.session.userId = user._id;
       res.redirect('/');
     })
     .catch((error) => {
