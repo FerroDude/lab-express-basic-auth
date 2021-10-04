@@ -1,12 +1,13 @@
+'use strict';
+
 const User = require('../models/user');
 
-const userDeserializerMiddleware = (req, res, next) => {
+module.exports = (req, res, next) => {
   const userId = req.session.userId;
   if (userId) {
     User.findById(userId)
       .then((user) => {
         req.user = user;
-        res.locals.user = user;
         next();
       })
       .catch((error) => {
@@ -16,5 +17,3 @@ const userDeserializerMiddleware = (req, res, next) => {
     next();
   }
 };
-
-module.exports = userDeserializerMiddleware;

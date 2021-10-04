@@ -4,8 +4,9 @@ const createError = require('http-errors');
 const logger = require('morgan');
 const sassMiddleware = require('node-sass-middleware');
 const serveFavicon = require('serve-favicon');
-const MongoStore = require('connect-mongo');
+const connectMongo = require('connect-mongo');
 const expressSession = require('express-session');
+const basicAuthenticationDeserializer = require('./middleware/user-deserializer.js');
 
 const authenticationRouter = require('./routes/authentication');
 
@@ -39,15 +40,17 @@ app.use(
     saveUninitialized: false,
     resave: true,
     cookie: {
-      maxAge: 15 * 24 * 60 * 60 * 1000 // 15 days
+      maxAge: 15 * 24 * 60 * 60 * 1000, // 15 days
+      httpOnly: true
     },
-    store: MongoStore.create({
+    store: connectMongo.create({
       mongoUrl: process.env.MONGODB_URI,
       ttl: 60 * 60
     })
   })
 );
 
+app.use(basicAuthenticationDeserializer);
 app.use('/', indexRouter);
 app.use('/authentication', authenticationRouter);
 
